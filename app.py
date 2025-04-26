@@ -29,7 +29,7 @@ class WeatherApp:
 
             if not parsed_data:
                 print(
-                    f"[bold yellow]City '{self.city_name}' not found. Please check the spelling and try again.[/bold yellow]")
+                    f"[bold yellow]City '{self.city_name}' not found. Please check the spelling and try again.[/]")
                 return None
 
             self.longitude = parsed_data[0]['lon']
