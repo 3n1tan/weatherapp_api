@@ -2,6 +2,8 @@ import requests
 from rich import print_json, print
 import os
 from dotenv import load_dotenv
+from pathlib import Path
+import csv
 
 load_dotenv()
 
@@ -16,6 +18,8 @@ class WeatherApp:
         self.api_key = api_key
         self.longitude = []
         self.latitude = []
+        self.weather_forecast = []
+
 
     def get_geo_location(self):
         self.geo_params = {
@@ -30,10 +34,11 @@ class WeatherApp:
             if not parsed_data:
                 print(
                     f"[bold yellow]City '{self.city_name}' not found. Please check the spelling and try again.[/]")
-                return None
+                return
 
             self.longitude = parsed_data[0]['lon']
             self.latitude = parsed_data[0]['lat']
+            # self.weather_forecast = parsed_data
             return parsed_data
         except requests.exceptions.HTTPError as error:
             print(
@@ -54,14 +59,18 @@ class WeatherApp:
                 weather_url, params=self.weather_params)  # type: ignore
             response.raise_for_status()
             parsed_data = response.json()
+            self.weather_forecast = parsed_data
             return parsed_data['list']
-            # return parsed_data['list'][0]['weather']
         except requests.exceptions.HTTPError as error:
             print(
                 f"[bold red]HTTP error occurred:[/] {error} — Status code: {error}")
         except requests.exceptions.RequestException as error:
             print(f"There was an error: {error}")
             return
+        
+    def create_weather_csv(self):
+        return(self.weather_forecast)
+
 
 
 def main():
@@ -70,13 +79,19 @@ def main():
         city_name = input("Enter a city name: ").strip()
         city = WeatherApp(city_name.lower())
         city_location = city.get_geo_location()
+        print(city_location)
 
         if not city_location:
             return
 
         city_forecast = city.get_forecast()
-        print(city_location)
         print(city_forecast)
+
+        print("*********************")
+
+        weather_report = city.create_weather_csv()
+        print(weather_report)
+
     except TypeError as error:
         print(f"Only strings a re accepted")
 
